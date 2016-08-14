@@ -38,6 +38,12 @@ enum WireVal {
 	_Z
 };
 
+enum PortDriveError {
+	PORT_DRIVE_OK,
+	PORT_DRIVE_ERROR_NOTAREG,
+	PORT_DRIVE_ERROR_OUTOFBOUNDS
+};
+
 /* Signal callback type: */
 typedef void (*sig_raise_t)(WireVal wire_logicval, WireEdge edge); /* Logic val can be: X, Z, 0 and 1 */
 
@@ -66,8 +72,8 @@ public:
 	Port(PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
 
 	void connect(Port* dst_port);
-	void drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive);
-	void drive_all(std::vector<WireVal> wire_valdrive);
+	PortDriveError drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive);
+	PortDriveError drive_all(std::vector<WireVal> wire_valdrive);
 	void set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cback);
 	void update();
 };

@@ -9,7 +9,7 @@
 
 Port::Port(PortDir dir, PortType type, uint32_t port_width, uint32_t default_val) {
 	oe = 0;
-	synced = 1; /* Synchronous by default */
+	synced = 0; /* Asynchronous by default */
 	this->dir = dir;
 	this->type = type;
 	/* Initialize internal wire: */
@@ -61,19 +61,22 @@ void Port::set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cba
 }
 
 /* Drive partial part of the wires and try to match the wire_valdrive value in this window: */
-void Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive) {
-	if(wire_offset < 0 || wire_offset >= wires.size()) return;
+PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive) {
+	if(type != PORT_REG) return PORT_DRIVE_ERROR_NOTAREG;
+
+	if(wire_offset < 0 || wire_offset >= wires.size()) return PORT_DRIVE_ERROR_NOTAREG;
 
 	for(uint32_t i = wire_offset, j = 0; (i < wires.size()) && (i < wire_offset + wire_length) && (j < wire_valdrive.size()); i++) {
 		WireVal logic = wire_valdrive[j++];
 		wires[i].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _X ? NULLEDGE : NOEDGE;
 		wires[i].val = logic;
 	}
+	return PORT_DRIVE_OK;
 }
 
 /* Drive all the wires */
-void Port::drive_all(std::vector<WireVal> wire_valdrive) {
-	drive(0, wires.size(), wire_valdrive);
+PortDriveError Port::drive_all(std::vector<WireVal> wire_valdrive) {
+	return drive(0, wires.size(), wire_valdrive);
 }
 
 /* Connect destination port with this current source port: */

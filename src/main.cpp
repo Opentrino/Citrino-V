@@ -10,6 +10,11 @@ void cback(WireVal wire_logicval, WireEdge edge) {
 	std::cout<<"Signal called me: "<<(i++)<<" "<<edge<<"\n";
 }
 
+int i2 = 0;
+void cback2(WireVal wire_logicval, WireEdge edge) {
+	std::cout<<"Signal 2 called me: "<<(i2++)<<" "<<edge<<"\n";
+}
+
 class MyComponent : Module {
 public:
 	Port * out;
@@ -22,6 +27,7 @@ public:
 		clk = new Port(PORT_INPUT,  PORT_WIRE, 1,  0);
 
 		out->set_sensitivity(0, ALLEDGES, (sig_raise_t)&cback);
+		out->set_sensitivity(1, ALLEDGES, (sig_raise_t)&cback2);
 
 		ports.push_back(out);
 		ports.push_back(in);
@@ -35,7 +41,7 @@ public:
 			out->drive_all({_1,_0});
 			break;
 		case 4:
-			out->drive_all({_0,_0});
+			out->drive_all({_0,_X});
 			break;
 		case 5:
 			out->drive_all({_1,_0});
