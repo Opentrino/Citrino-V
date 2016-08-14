@@ -72,8 +72,26 @@ inline std::string wireval_to_str(std::vector<WireVal> val) {
 	return ret;
 }
 
+inline std::string wire_to_str(std::vector<wire_t> * wires) {
+	std::string ret;
+	for(int i = 0; i < (int)wires->size(); i++)
+		ret += (*wires)[i].val == _0 ? "0" : (*wires)[i].val == _1 ? "1" : (*wires)[i].val == _X ? "X" : "Z";
+	return ret;
+}
+
 inline void print_wireval(std::vector<WireVal> val) {
 	std::cout<<wireval_to_str(val);
+}
+
+inline void print_wires(std::vector<wire_t> * wires) {
+	std::cout<<wire_to_str(wires);
+}
+
+inline std::vector<WireVal> wires_to_wireval(std::vector<wire_t> * wires) {
+	std::vector<WireVal> ret;
+	for(int i = (int)(wires->size() - 1); i >= 0; i--)
+		ret.push_back((*wires)[i].val);
+	return ret;
 }
 
 #endif /* LOW_LVL_WIREVAL_H_ */

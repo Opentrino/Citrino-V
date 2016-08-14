@@ -45,7 +45,7 @@ enum PortDriveError {
 };
 
 /* Signal callback type: */
-typedef void (*sig_raise_t)(uint32_t modid, WireVal wire_logicval, WireEdge edge); /* Logic val can be: X, Z, 0 and 1 */
+typedef void (*sig_raise_t)(uint32_t modid, uint32_t portid, uint32_t wireid, WireVal wire_logicval, WireEdge edge); /* Logic val can be: X, Z, 0 and 1 */
 
 /* Signal struct type: */
 typedef struct signal {
@@ -78,8 +78,11 @@ public:
 	PortDriveError drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive);
 	PortDriveError drive_all(std::vector<WireVal> wire_valdrive);
 	void set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cback);
-	void update(uint32_t modid);
+	void set_sensitivity_bus(sig_raise_t sig_cback);
+	void update(uint32_t modid, uint32_t portid);
 	void clean_wires();
+	uint32_t get_wire_width();
+	std::vector<wire_t> * get_wires();
 };
 
 #endif /* PORT_H_ */

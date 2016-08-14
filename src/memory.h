@@ -14,6 +14,7 @@ class MainMemory : Module{
 public:
 	MainMemory();
 	void update();
+	void initial();
 };
 
 #endif /* MEMORY_H_ */

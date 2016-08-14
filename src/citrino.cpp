@@ -13,3 +13,7 @@ Citrino::Citrino() : Module() {
 void Citrino::update() {
 
 }
+
+void Citrino::initial() {
+
+}

@@ -14,3 +14,7 @@ MainMemory::MainMemory() : Module() {
 void MainMemory::update() {
 
 }
+
+void MainMemory::initial() {
+
+}

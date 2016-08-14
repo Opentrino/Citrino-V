@@ -14,6 +14,7 @@ class Citrino : Module{
 public:
 	Citrino();
 	void update();
+	void initial();
 };
 
 #endif /* CITRINO_H_ */

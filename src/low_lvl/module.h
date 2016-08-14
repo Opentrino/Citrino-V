@@ -25,6 +25,7 @@ public:
 	void addport(Port * port);
 	virtual ~Module() = 0;
 	virtual void update() = 0; /* The module will be updated when its inputs are also updated */
+	virtual void initial() = 0; /* Every module will have atleast one initial function, without counting with the constructor */
 };
 
 #endif /* MODULE_H_ */

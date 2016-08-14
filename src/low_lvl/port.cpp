@@ -36,7 +36,7 @@ Port::Port(PortDir dir, PortType type, uint32_t port_width, uint32_t default_val
 	}
 }
 
-void Port::update(uint32_t modid) { /* Update Port by checking sensitivity list */
+void Port::update(uint32_t modid, uint32_t portid) { /* Update Port by checking sensitivity list */
 	std::vector<signal_t> sigs_called;
 
 	for(size_t i = 0; i < (*wires).size(); i++) {
@@ -65,7 +65,7 @@ void Port::update(uint32_t modid) { /* Update Port by checking sensitivity list 
 				}
 				if(!sig_already_called) {
 					sigs_called.push_back((*signals)[i]);
-					(*signals)[i].raise(modid, (*wires)[i].val, (*wires)[i].edge); /* Call callback if a delta signal is detected */
+					(*signals)[i].raise(modid, portid, i, (*wires)[i].val, (*wires)[i].edge); /* Call callback if a delta signal is detected */
 				}
 			}
 		}
@@ -79,13 +79,18 @@ void Port::set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cba
 	(*signals)[nth_wire].raise = sig_cback;
 }
 
+void Port::set_sensitivity_bus(sig_raise_t sig_cback) {
+	for(size_t i = 0; i < (*wires).size(); i++)
+		set_sensitivity(i, ALLEDGES, sig_cback);
+}
+
 /* Drive partial part of the wires and try to match the wire_valdrive value in this window: */
 PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive) {
 	if(type != PORT_REG) return PORT_DRIVE_ERROR_NOTAREG;
 	if(wire_offset >= (*wires).size()) return PORT_DRIVE_ERROR_OUTOFBOUNDS;
 
-	for(uint32_t i = wire_offset, j = 0; (i < (*wires).size()) && (i < wire_offset + wire_length) && (j < wire_valdrive.size()); i++) {
-		WireVal logic = wire_valdrive[j++];
+	for(uint32_t i = wire_offset, j = wire_valdrive.size() - 1; (i < (*wires).size()) && (i < wire_offset + wire_length) && (j >= 0); i++) {
+		WireVal logic = wire_valdrive[j--];
 		(*wires)[i].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _X ? NULLEDGE : NOEDGE;
 		(*wires)[i].val = logic;
 	}
@@ -114,4 +119,12 @@ void Port::clean_wires() {
 		delete wires;
 		wires_dirty = 0;
 	}
+}
+
+uint32_t Port::get_wire_width() {
+	return wires->size();
+}
+
+std::vector<wire_t> * Port::get_wires() {
+	return wires;
 }
