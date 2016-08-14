@@ -22,7 +22,7 @@ public:
 	Port * clk;
 
 	MyComponent() : Module() {
-		out = new Port(PORT_OUTPUT, PORT_REG,  2, 0);
+		out = new Port(PORT_OUTPUT, PORT_REG,  32, 0);
 		in  = new Port(PORT_INPUT,  PORT_WIRE, 32, 0);
 		clk = new Port(PORT_INPUT,  PORT_WIRE, 1,  0);
 

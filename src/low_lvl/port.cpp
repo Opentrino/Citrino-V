@@ -64,7 +64,7 @@ void Port::set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cba
 PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive) {
 	if(type != PORT_REG) return PORT_DRIVE_ERROR_NOTAREG;
 
-	if(wire_offset < 0 || wire_offset >= wires.size()) return PORT_DRIVE_ERROR_NOTAREG;
+	if(wire_offset < 0 || wire_offset >= wires.size()) return PORT_DRIVE_ERROR_OUTOFBOUNDS;
 
 	for(uint32_t i = wire_offset, j = 0; (i < wires.size()) && (i < wire_offset + wire_length) && (j < wire_valdrive.size()); i++) {
 		WireVal logic = wire_valdrive[j++];
