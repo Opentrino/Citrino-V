@@ -1,8 +1,10 @@
 #include <iostream>
+#include <stdio.h>
 #include "citrino.h"
-#include "low_lvl/module.h"
 #include "memory.h"
+#include "low_lvl/module.h"
 #include "low_lvl/port.h"
+#include "low_lvl/wireval.h"
 #include "low_lvl/refresher.h"
 
 int i = 0;
@@ -62,6 +64,10 @@ int main() {
 	MainMemory mem;
 	Citrino cpu;
 	MyComponent c;
+
+	print_wireval({_0,_1,_0,_X,_Z,_1,_0});
+	printf("\n%d", wireval_u8(to_wireval(255)));
+
 	refresher.update();
 	return 0;
 }
