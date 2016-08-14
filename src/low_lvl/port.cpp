@@ -31,7 +31,11 @@ void Port::update() { /* Update Port by checking sensitivity list */
 		if(wires[i].edge != wires[i].old_edge) {
 			wires[i].old_edge = wires[i].edge; /* Update old edge */
 			/* Check if the wire was pulled high or low by the driver (some other module): */
-			if(wires[i].signal.raise && wires[i].edge != NULLEDGE && (wires[i].signal.edge_trigger == wires[i].edge || wires[i].signal.edge_trigger == LEVELEDGE)) {
+			if(wires[i].signal.raise &&
+					((wires[i].signal.edge_trigger == wires[i].edge ||
+							(wires[i].signal.edge_trigger == LEVELEDGE &&
+									(wires[i].edge == POSEDGE || wires[i].edge == NEGEDGE)))
+				|| wires[i].signal.edge_trigger == ALLEDGES)) {
 				/* Check if this signal was already called previously */
 				bool sig_already_called = 0;
 				for(auto sig : sigs_called) {
@@ -57,13 +61,19 @@ void Port::set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cba
 }
 
 /* Drive partial part of the wires and try to match the wire_valdrive value in this window: */
-void Port::drive(uint32_t wire_offset, uint32_t wire_length, uint32_t wire_valdrive) {
+void Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive) {
+	if(wire_offset < 0 || wire_offset >= wires.size()) return;
 
+	for(uint32_t i = wire_offset, j = 0; (i < wires.size()) && (i < wire_offset + wire_length) && (j < wire_valdrive.size()); i++) {
+		WireVal logic = wire_valdrive[j++];
+		wires[i].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _X ? NULLEDGE : NOEDGE;
+		wires[i].val = logic;
+	}
 }
 
 /* Drive all the wires */
-void Port::drive_all(uint32_t wire_valdrive) {
-
+void Port::drive_all(std::vector<WireVal> wire_valdrive) {
+	drive(0, wires.size(), wire_valdrive);
 }
 
 /* Connect destination port with this current source port: */

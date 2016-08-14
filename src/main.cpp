@@ -21,15 +21,33 @@ public:
 		in  = new Port(PORT_INPUT,  PORT_WIRE, 32, 0);
 		clk = new Port(PORT_INPUT,  PORT_WIRE, 1,  0);
 
-		out->set_sensitivity(0, NEGEDGE, (sig_raise_t)&cback);
+		out->set_sensitivity(0, ALLEDGES, (sig_raise_t)&cback);
 
 		ports.push_back(out);
 		ports.push_back(in);
 		ports.push_back(clk);
 	}
 
+	int i = 0;
 	void update() {
-
+		switch(i) {
+		case 2:
+			out->drive_all({_1,_0});
+			break;
+		case 4:
+			out->drive_all({_0,_0});
+			break;
+		case 5:
+			out->drive_all({_1,_0});
+			break;
+		case 6:
+			out->drive_all({_Z,_0});
+			break;
+		case 7:
+			out->drive_all({_X,_0});
+			break;
+		}
+		i++;
 	}
 };
 

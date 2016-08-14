@@ -26,6 +26,8 @@ enum WireEdge {
 	NEGEDGE,   /* Negative Edge */
 	POSEDGE,   /* Positive Edge */
 	LEVELEDGE, /* Both Posedge and Negedge */
+	NOEDGE,	   /* Same as going from any other edge to Z */
+	ALLEDGES,  /* All edges, even invalid ones, will trigger */
 	NULLEDGE   /* Invalid Edge */
 };
 
@@ -64,8 +66,8 @@ public:
 	Port(PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
 
 	void connect(Port* dst_port);
-	void drive(uint32_t wire_offset, uint32_t wire_length, uint32_t wire_valdrive);
-	void drive_all(uint32_t wire_valdrive);
+	void drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive);
+	void drive_all(std::vector<WireVal> wire_valdrive);
 	void set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cback);
 	void update();
 };
