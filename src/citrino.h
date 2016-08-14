@@ -8,9 +8,12 @@
 #ifndef CITRINO_H_
 #define CITRINO_H_
 
-class Citrino {
+#include "low_lvl/module.h"
+
+class Citrino : Module{
 public:
 	Citrino();
+	void update();
 };
 
 #endif /* CITRINO_H_ */

@@ -18,8 +18,11 @@ public:
 	std::string desc;
 	std::string author;
 	std::vector<Port*> ports;
+	uint32_t mod_id;
 
 	Module();
+	void addport(Port & port);
+	void addport(Port * port);
 	virtual ~Module() = 0;
 	virtual void update() = 0; /* The module will be updated when its inputs are also updated */
 };

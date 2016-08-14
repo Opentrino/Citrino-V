@@ -7,6 +7,10 @@
 
 #include "memory.h"
 
-MainMemory::MainMemory() {
+MainMemory::MainMemory() : Module() {
+
+}
+
+void MainMemory::update() {
 
 }

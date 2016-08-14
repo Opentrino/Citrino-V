@@ -8,9 +8,12 @@
 #ifndef MEMORY_H_
 #define MEMORY_H_
 
-class MainMemory {
+#include "low_lvl/module.h"
+
+class MainMemory : Module{
 public:
 	MainMemory();
+	void update();
 };
 
 #endif /* MEMORY_H_ */

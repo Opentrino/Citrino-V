@@ -45,7 +45,7 @@ enum PortDriveError {
 };
 
 /* Signal callback type: */
-typedef void (*sig_raise_t)(WireVal wire_logicval, WireEdge edge); /* Logic val can be: X, Z, 0 and 1 */
+typedef void (*sig_raise_t)(uint32_t modid, WireVal wire_logicval, WireEdge edge); /* Logic val can be: X, Z, 0 and 1 */
 
 /* Signal struct type: */
 typedef struct signal {
@@ -54,19 +54,22 @@ typedef struct signal {
 } signal_t;
 
 typedef struct wire {
-	WireVal val; /* X, Z, 0, 1 */
-	WireEdge edge; /* Wire edge sensitivity. Can be posedge or negedge */
-	WireEdge old_edge; /* Store old edge */
-	signal_t signal; /* Signal callbacks. Each wire can have a callback */
+	WireVal val;       			     /* X, Z, 0, 1 */
+	WireEdge edge;     			     /* Wire edge sensitivity. Can be posedge or negedge */
+	WireEdge old_edge; 			     /* Store old edge in order to detect a change in logic */
+	uint32_t modules_connected;      /* How many modules share this wire */
+	uint32_t modules_connected_orig; /* Original value of the previous variable */
 } wire_t;
 
 class Port {
 private:
-	PortDir dir;   /* Input, Output, Inout */
-	PortType type; /* Reg or Wire */
-	bool synced;   /* Synchronous or asynchronous */
-	bool oe;       /* Output Enable */
-	std::vector<wire_t> wires; /* Wires */
+	PortDir dir;                     /* Input, Output, Inout */
+	PortType type;                   /* Reg or Wire */
+	bool synced;                     /* Synchronous or asynchronous */
+	bool oe;                         /* Output Enable */
+	std::vector<wire_t> * wires;     /* Wires */
+	std::vector<signal_t> * signals; /* Signal callbacks. Each wire can have a callback, but each port may have different signals */
+	bool wires_dirty = 0;
 
 public:
 	Port(PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
@@ -75,7 +78,8 @@ public:
 	PortDriveError drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive);
 	PortDriveError drive_all(std::vector<WireVal> wire_valdrive);
 	void set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cback);
-	void update();
+	void update(uint32_t modid);
+	void clean_wires();
 };
 
 #endif /* PORT_H_ */

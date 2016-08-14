@@ -8,14 +8,20 @@
 #include "low_lvl/refresher.h"
 
 int i = 0;
-void cback(WireVal wire_logicval, WireEdge edge) {
-	std::cout<<"Signal called me: "<<(i++)<<" "<<edge<<"\n";
+void cback(uint32_t modid, WireVal wire_logicval, WireEdge edge) {
+	std::cout<<"Signal called me:\tid- "<<modid<<", "<<(i++)<<" "<<edge<<"\n";
 }
 
 int i2 = 0;
-void cback2(WireVal wire_logicval, WireEdge edge) {
-	std::cout<<"Signal 2 called me: "<<(i2++)<<" "<<edge<<"\n";
+void cback2(uint32_t modid, WireVal wire_logicval, WireEdge edge) {
+	std::cout<<"Signal 2 called me:\tid- "<<modid<<", "<<(i2++)<<" "<<edge<<"\n";
 }
+
+int i3 = 0;
+void cback3(uint32_t modid, WireVal wire_logicval, WireEdge edge) {
+	std::cout<<"Signal 3 called me:\tid- "<<modid<<", "<<(i3++)<<" "<<edge<<"\n";
+}
+
 
 class MyComponent : Module {
 public:
@@ -31,9 +37,9 @@ public:
 		out->set_sensitivity(0, ALLEDGES, (sig_raise_t)&cback);
 		out->set_sensitivity(1, ALLEDGES, (sig_raise_t)&cback2);
 
-		ports.push_back(out);
-		ports.push_back(in);
-		ports.push_back(clk);
+		addport(out);
+		addport(in);
+		addport(clk);
 	}
 
 	int i = 0;
@@ -49,7 +55,7 @@ public:
 			out->drive_all({_1,_0});
 			break;
 		case 6:
-			out->drive_all({_Z,_0});
+			out->drive_all({_Z,_1});
 			break;
 		case 7:
 			out->drive_all({_X,_0});
@@ -59,15 +65,32 @@ public:
 	}
 };
 
+class OtherComponent : Module {
+public:
+	Port * myport;
+	OtherComponent() : Module() {
+		myport = new Port(PORT_OUTPUT, PORT_WIRE,  32, 0);
+		myport->set_sensitivity(1, ALLEDGES, (sig_raise_t)&cback3);
+
+		addport(myport);
+	}
+
+	void update() {
+
+	}
+};
+
 int main() {
-	std::cout<<">> Citrino-V Microprocessor\n";
+	std::cout<<">> Citrino-V Microprocessor <<\n";
 	MainMemory mem;
 	Citrino cpu;
+
 	MyComponent c;
+	OtherComponent c2;
 
-	print_wireval({_0,_1,_0,_X,_Z,_1,_0});
-	printf("\n%d", wireval_u8(to_wireval(255)));
+	/* Connect modules: */
+	c.out->connect(c2.myport);
 
-	refresher.update();
+	refresher.refresh_all();
 	return 0;
 }

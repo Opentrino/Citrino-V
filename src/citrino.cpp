@@ -6,6 +6,10 @@
  */
 #include "citrino.h"
 
-Citrino::Citrino() {
+Citrino::Citrino() : Module() {
+
+}
+
+void Citrino::update() {
 
 }
