@@ -10,7 +10,13 @@
 
 #include <vector>
 #include <string>
-#include "port.h"
+
+#define PORT_INIT(PORT_PTR, PORT_DIR, PORT_TYPE, PORT_WIDTH, DEFAULT_VAL) PORT_PTR = new Port(this, PORT_DIR, PORT_TYPE, PORT_WIDTH, DEFAULT_VAL)
+#define PORT_DECL(PORT_NAME) Port * PORT_NAME
+#define PORT_NEW(PORT_NAME, PORT_DIR, PORT_TYPE, PORT_WIDTH, DEFAULT_VAL) Port * PORT_INIT(PORT_NAME, PORT_DIR, PORT_TYPE, PORT_WIDTH, DEFAULT_VAL)
+#define PORT_CONNECT(PORT_SRC, PORT_DST) PORT_SRC->connect(PORT_DST)
+
+class Port;
 
 class Module {
 public:
@@ -24,7 +30,7 @@ public:
 	void addport(Port & port);
 	void addport(Port * port);
 	virtual ~Module() = 0;
-	virtual void update() = 0; /* The module will be updated when its inputs are also updated */
+	virtual void update()  = 0; /* The module will be updated when its inputs are also updated */
 	virtual void initial() = 0; /* Every module will have atleast one initial function, without counting with the constructor */
 };
 

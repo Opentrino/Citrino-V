@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <iostream>
+#include "module.h"
 
 enum PortDir {
 	PORT_INPUT,
@@ -54,9 +55,9 @@ typedef struct signal {
 } signal_t;
 
 typedef struct wire {
-	WireVal val;       			     /* X, Z, 0, 1 */
-	WireEdge edge;     			     /* Wire edge sensitivity. Can be posedge or negedge */
-	WireEdge old_edge; 			     /* Store old edge in order to detect a change in logic */
+	WireVal val;                     /* X, Z, 0, 1 */
+	WireEdge edge;                   /* Wire edge sensitivity. Can be posedge or negedge */
+	WireEdge old_edge;               /* Store old edge in order to detect a change in logic */
 	uint32_t modules_connected;      /* How many modules share this wire */
 	uint32_t modules_connected_orig; /* Original value of the previous variable */
 } wire_t;
@@ -72,7 +73,7 @@ private:
 	bool wires_dirty = 0;
 
 public:
-	Port(PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
+	Port(Module * ctx, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
 
 	void connect(Port* dst_port);
 	PortDriveError drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive);

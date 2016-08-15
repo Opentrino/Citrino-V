@@ -9,18 +9,12 @@
 
 class MyComponent : Module {
 public:
-	Port * out;
-	Port * in;
-	Port * clk;
+	PORT_NEW(out, PORT_OUTPUT, PORT_REG,  32, 0);
+	PORT_NEW(in,  PORT_INPUT,  PORT_WIRE, 32, 0);
+	PORT_NEW(clk, PORT_INPUT,  PORT_WIRE, 1,  0);
 
 	MyComponent() : Module() {
-		out = new Port(PORT_OUTPUT, PORT_REG,  32, 0);
-		in  = new Port(PORT_INPUT,  PORT_WIRE, 32, 0);
-		clk = new Port(PORT_INPUT,  PORT_WIRE, 1,  0);
 
-		addport(out);
-		addport(in);
-		addport(clk);
 	}
 
 	int i = 0;
@@ -57,13 +51,10 @@ void cback(uint32_t modid, uint32_t portid, uint32_t wireid, WireVal wire_logicv
 
 class OtherComponent : Module {
 public:
-	Port * myport;
+	PORT_NEW(myport, PORT_OUTPUT, PORT_WIRE,  32, 0);
 
 	OtherComponent() : Module() {
-		myport = new Port(PORT_OUTPUT, PORT_WIRE,  32, 0);
 		myport->set_sensitivity_bus(cback);
-
-		addport(myport);
 	}
 
 	void update() {
@@ -84,9 +75,9 @@ int main() {
 	OtherComponent c2;
 
 	/* Connect modules: */
-	c.out->connect(c2.myport);
+	PORT_CONNECT(c.out, c2.myport);
 
-	refresher.init_all();
-	refresher.refresh_all();
+	/* Run processes/initial and always blocks: */
+	refresher.run();
 	return 0;
 }

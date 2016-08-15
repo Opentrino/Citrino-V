@@ -6,18 +6,17 @@
  */
 
 #include <vector>
-
-#include "module.h"
+#include "port.h"
+#include "../libs/tinythread/tinythread.h"
 
 class Refresher { /* Updates the physics of the circuit */
 public:
 	static std::vector<Module*> modules;
-	bool refreshing = 1;
+	static bool refreshing;
 	static uint32_t module_id;
 
 	static void add_component(Module * comp);
-	void refresh_all();
-	void init_all();
+	void run(); /* Runs the initials and updates in different threads */
 
 	static Module * get_module(uint32_t modid);
 	static Port * get_port(uint32_t modid, uint32_t portid);

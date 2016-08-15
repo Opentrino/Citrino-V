@@ -7,7 +7,7 @@
 
 #include "port.h"
 
-Port::Port(PortDir dir, PortType type, uint32_t port_width, uint32_t default_val) {
+Port::Port(Module * ctx, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val) {
 	oe = 0;
 	synced = 0; /* Asynchronous by default */
 	this->dir = dir;
@@ -34,6 +34,7 @@ Port::Port(PortDir dir, PortType type, uint32_t port_width, uint32_t default_val
 		nullsignal.edge_trigger = NULLEDGE; /* No sensitivity present */
 		signals->push_back(nullsignal);
 	}
+	ctx->addport(this);
 }
 
 void Port::update(uint32_t modid, uint32_t portid) { /* Update Port by checking sensitivity list */
@@ -91,7 +92,7 @@ PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vect
 
 	for(uint32_t i = wire_offset, j = wire_valdrive.size() - 1; (i < (*wires).size()) && (i < wire_offset + wire_length) && (j >= 0); i++) {
 		WireVal logic = wire_valdrive[j--];
-		(*wires)[i].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _X ? NULLEDGE : NOEDGE;
+		(*wires)[i].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _Z ? NOEDGE : NULLEDGE;
 		(*wires)[i].val = logic;
 	}
 	return PORT_DRIVE_OK;
