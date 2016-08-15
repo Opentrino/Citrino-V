@@ -9,7 +9,7 @@
 #include "refresher.h"
 
 Module::Module() {
-	Refresher::add_component(this);
+	Refresher::add_module(this);
 	mod_id = Refresher::get_new_module_id();
 }
 

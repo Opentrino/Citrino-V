@@ -9,13 +9,11 @@
 
 class MyComponent : Module {
 public:
-	PORT_NEW(out, PORT_OUTPUT, PORT_REG,  32, 0);
+	PORT_NEW(out, PORT_OUTPUT, PORT_REG,  8, 0);
 	PORT_NEW(in,  PORT_INPUT,  PORT_WIRE, 32, 0);
 	PORT_NEW(clk, PORT_INPUT,  PORT_WIRE, 1,  0);
 
-	MyComponent() : Module() {
-
-	}
+	MyComponent() : Module() {}
 
 	int i = 0;
 	void update() {
@@ -46,7 +44,7 @@ public:
 
 void cback(uint32_t modid, uint32_t portid, uint32_t wireid, WireVal wire_logicval, WireEdge edge) {
 	std::vector<WireVal> wireval = Refresher::get_wireval(modid, portid, wireid);
-	uint32_t val = wireval_u32(wireval);
+	uint8_t val = wireval_u8(wireval);
 	printf("Signal. Module: %d Port: %d Wire: %d Val: %d -> ", modid, portid, wireid, val);
 	print_wireval(wireval);
 	printf("\n");
@@ -54,14 +52,12 @@ void cback(uint32_t modid, uint32_t portid, uint32_t wireid, WireVal wire_logicv
 
 class OtherComponent : Module {
 public:
-	PORT_NEW(myport, PORT_OUTPUT, PORT_WIRE,  32, 0);
+	PORT_NEW(myport, PORT_OUTPUT, PORT_WIRE,  8, 0);
 
-	OtherComponent() : Module() {
-		myport->set_sensitivity_bus(cback);
-	}
+	OtherComponent() : Module() {}
 
 	void update() {
-
+		myport->set_sensitivity_bus(cback);
 	}
 
 	void initial() {
@@ -77,7 +73,7 @@ int main() {
 	MyComponent c;
 	OtherComponent c2;
 
-	/* Connect modules: */
+	/* Connect ports between modules: */
 	PORT_CONNECT(c.out, c2.myport);
 
 	/* Run processes/initial and always blocks: */

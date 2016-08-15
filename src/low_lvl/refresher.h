@@ -15,7 +15,7 @@ public:
 	static bool refreshing;
 	static uint32_t module_id;
 
-	static void add_component(Module * comp);
+	static void add_module(Module * comp);
 	void run(); /* Runs the initials and updates in different threads */
 
 	static Module * get_module(uint32_t modid);

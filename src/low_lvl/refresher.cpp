@@ -14,7 +14,7 @@ uint32_t Refresher::module_id = 0;
 bool Refresher::refreshing = 1;
 Refresher refresher;
 
-void Refresher::add_component(Module * comp) {
+void Refresher::add_module(Module * comp) {
 	modules.push_back(comp);
 }
 

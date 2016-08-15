@@ -28,7 +28,7 @@ Port::Port(Module * ctx, PortDir dir, PortType type, uint32_t port_width, uint32
 		wire.modules_connected_orig = 0;
 		wires->push_back(wire);
 
-		/* Setup a single null signal for this particular wire on this particular port on this particular component: */
+		/* Setup a single null signal for this particular wire on this particular port on this particular module: */
 		signal_t nullsignal;
 		nullsignal.raise = 0; /* Null callback */
 		nullsignal.edge_trigger = NULLEDGE; /* No sensitivity present */
@@ -84,9 +84,6 @@ void Port::set_sensitivity_bus(sig_raise_t sig_cback) {
 	for(size_t i = 0; i < (*wires).size(); i++)
 		set_sensitivity(i, ALLEDGES, sig_cback);
 }
-
-#include "wireval.h"
-#include <stdio.h>
 
 /* Drive partial part of the wires and try to match the wire_valdrive value in this window: */
 PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive) {
