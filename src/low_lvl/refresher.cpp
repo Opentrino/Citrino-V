@@ -28,13 +28,13 @@ void init_dispatch_call(void * arg) {
 	joinlist.push_back((int)arg);
 }
 
-void refresh_always(void * arg) { /* Arg will be ignored */
+void refresh_always() { /* Arg will be ignored */
 	while(Refresher::refreshing) {
 		/* Join all threads: */
 		for(int i = 0; i < (int)joinlist.size(); i++) {
 			thlist[joinlist[i]]->join();
 			delete thlist[joinlist[i]];
-			joinlist.erase(joinlist.begin()+i);
+			joinlist.erase(joinlist.begin() + i);
 		}
 		for(Module * mod : Refresher::modules) { /* Update all components */
 			for(size_t i = 0; i < mod->ports.size(); i++) /* Update all Ports of every component */
@@ -49,7 +49,7 @@ void Refresher::run() {
 	for(int i = 0; i < (int)modules.size(); i++)
 		thlist.push_back(new tthread::thread(init_dispatch_call, (void*)(i)));
 	/* Run the updates on the main thread: */
-	refresh_always(0);
+	refresh_always();
 }
 
 Module * Refresher::get_module(uint32_t modid) {
@@ -69,9 +69,7 @@ std::vector<wire_t> * Refresher::get_wires(uint32_t modid, uint32_t portid) {
 
 	Port * port = get_port(modid, portid);
 	if(!port) return 0;
-
-	std::vector<wire_t> * ret = port->get_wires();
-	return ret;
+	return port->get_wires();
 }
 
 wire_t * Refresher::get_wire(uint32_t modid, uint32_t portid, uint32_t wireid) {

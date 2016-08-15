@@ -45,8 +45,11 @@ public:
 };
 
 void cback(uint32_t modid, uint32_t portid, uint32_t wireid, WireVal wire_logicval, WireEdge edge) {
-	uint8_t val = wireval_u8(Refresher::get_wireval(modid, portid, wireid));
-	printf("Signal. Module: %d Port: %d Wire: %d Val: %d\n", modid, portid, wireid, val);
+	std::vector<WireVal> wireval = Refresher::get_wireval(modid, portid, wireid);
+	uint32_t val = wireval_u32(wireval);
+	printf("Signal. Module: %d Port: %d Wire: %d Val: %d -> ", modid, portid, wireid, val);
+	print_wireval(wireval);
+	printf("\n");
 }
 
 class OtherComponent : Module {

@@ -85,12 +85,21 @@ void Port::set_sensitivity_bus(sig_raise_t sig_cback) {
 		set_sensitivity(i, ALLEDGES, sig_cback);
 }
 
+#include "wireval.h"
+#include <stdio.h>
+
 /* Drive partial part of the wires and try to match the wire_valdrive value in this window: */
 PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive) {
 	if(type != PORT_REG) return PORT_DRIVE_ERROR_NOTAREG;
 	if(wire_offset >= (*wires).size()) return PORT_DRIVE_ERROR_OUTOFBOUNDS;
 
-	for(uint32_t i = wire_offset, j = wire_valdrive.size() - 1; (i < (*wires).size()) && (i < wire_offset + wire_length) && (j >= 0); i++) {
+	/* Nullify the undriven wires. Then overwrite undriven wires with driven ones: */
+	for(int i = 0; i < (int)(*wires).size(); i++) {
+		(*wires)[i].edge = NULLEDGE;
+		(*wires)[i].val = _X;
+	}
+
+	for(int i = (int)wire_offset, j = (int)wire_valdrive.size() - 1; (i < (int)(*wires).size()) && (i < (int)(wire_offset + wire_length)) && (j >= 0); i++) {
 		WireVal logic = wire_valdrive[j--];
 		(*wires)[i].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _Z ? NOEDGE : NULLEDGE;
 		(*wires)[i].val = logic;
