@@ -16,6 +16,8 @@
 #define PORT_NEW(PORT_NAME, PORT_DIR, PORT_TYPE, PORT_WIDTH, DEFAULT_VAL) Port * PORT_INIT(PORT_NAME, PORT_DIR, PORT_TYPE, PORT_WIDTH, DEFAULT_VAL)
 #define PORT_CONNECT(PORT_SRC, PORT_DST) PORT_SRC->connect(PORT_DST)
 
+#define GET_WIREVAL(modid, portid) Refresher::get_wireval(modid, portid)
+
 class Port;
 
 class Module {

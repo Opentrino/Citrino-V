@@ -7,6 +7,22 @@
 #include "low_lvl/wireval.h"
 #include "low_lvl/refresher.h"
 
+void cback(uint32_t modid, uint32_t portid, uint32_t wireid, WireVal wire_logicval, WireEdge edge) {
+	wireval_t wireval = GET_WIREVAL(modid, portid);
+	uint8_t val = wireval_u8(wireval);
+	printf("Signal. Module: %d Port: %d Wire: %d Val: %d -> ", modid, portid, wireid, val);
+	print_wireval(wireval);
+	printf("\n");
+}
+
+void call(uint32_t modid, uint32_t portid, uint32_t wireid, WireVal wire_logicval, WireEdge edge) {
+	wireval_t wireval = GET_WIREVAL(modid, portid);
+	uint8_t val = wireval_u8(wireval);
+	printf("Signal 2. Module: %d Port: %d Wire: %d Val: %d -> ", modid, portid, wireid, val);
+	print_wireval(wireval);
+	printf("\n");
+}
+
 class MyComponent : Module {
 public:
 	PORT_NEW(out, PORT_OUTPUT, PORT_REG,  8, 0);
@@ -42,22 +58,30 @@ public:
 	}
 };
 
-void cback(uint32_t modid, uint32_t portid, uint32_t wireid, WireVal wire_logicval, WireEdge edge) {
-	std::vector<WireVal> wireval = Refresher::get_wireval(modid, portid, wireid);
-	uint8_t val = wireval_u8(wireval);
-	printf("Signal. Module: %d Port: %d Wire: %d Val: %d -> ", modid, portid, wireid, val);
-	print_wireval(wireval);
-	printf("\n");
-}
-
 class OtherComponent : Module {
 public:
-	PORT_NEW(myport, PORT_OUTPUT, PORT_WIRE,  8, 0);
+	PORT_NEW(myport,  PORT_OUTPUT, PORT_WIRE,  8, 0);
+	PORT_NEW(myport2, PORT_OUTPUT, PORT_WIRE,  8, 0);
 
-	OtherComponent() : Module() {}
-
-	void update() {
+	OtherComponent() : Module() {
 		myport->set_sensitivity_bus(cback);
+
+		myport2->assign_cond(0, {_0,_1}, {_1,_0});
+		myport2->set_sensitivity(0,NEGEDGE,call);
+		myport2->set_sensitivity(1,POSEDGE,call);
+	}
+
+	int i = 0;
+	void update() {
+		switch(i) {
+		case 2:
+			myport2->update_assign_condition(0, 1);
+			break;
+		case 4:
+			myport2->update_assign_condition(0, 0);
+			break;
+		}
+		i++;
 	}
 
 	void initial() {

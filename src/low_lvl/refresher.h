@@ -22,7 +22,7 @@ public:
 	static Port * get_port(uint32_t modid, uint32_t portid);
 	static std::vector<wire_t> * get_wires(uint32_t modid, uint32_t portid);
 	static wire_t * get_wire(uint32_t modid, uint32_t portid, uint32_t wireid);
-	static std::vector<WireVal> get_wireval(uint32_t modid, uint32_t portid, uint32_t wireid);
+	static std::vector<WireVal> get_wireval(uint32_t modid, uint32_t portid);
 
 	static uint32_t get_new_module_id() {
 		return module_id++;

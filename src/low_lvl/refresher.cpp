@@ -81,10 +81,26 @@ wire_t * Refresher::get_wire(uint32_t modid, uint32_t portid, uint32_t wireid) {
 	return &(*port->get_wires())[wireid];
 }
 
-std::vector<WireVal> Refresher::get_wireval(uint32_t modid, uint32_t portid, uint32_t wireid) {
+std::vector<WireVal> Refresher::get_wireval(uint32_t modid, uint32_t portid) {
 	std::vector<WireVal> ret;
 	std::vector<wire_t> * wires = get_wires(modid, portid);
 	if(wires)
 		ret = wires_to_wireval(wires);
 	return ret;
+}
+
+static std::vector<wire_t> static_wire;
+
+std::vector<wire_t> * wireval_to_wires(wireval_t wireval) {
+	static_wire.clear();
+	for(auto wire : wireval) {
+		wire_t new_wire;
+		new_wire.edge = NULLEDGE;
+		new_wire.modules_connected = 0;
+		new_wire.modules_connected_orig = 0;
+		new_wire.old_edge = NULLEDGE;
+		new_wire.val = wire; /* We only care about the value */
+		static_wire.push_back(new_wire);
+	}
+	return &static_wire;
 }

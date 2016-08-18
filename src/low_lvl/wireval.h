@@ -87,11 +87,14 @@ inline void print_wires(std::vector<wire_t> * wires) {
 	std::cout<<wire_to_str(wires);
 }
 
-inline std::vector<WireVal> wires_to_wireval(std::vector<wire_t> * wires) {
-	std::vector<WireVal> ret;
+inline wireval_t wires_to_wireval(std::vector<wire_t> * wires) {
+	wireval_t ret;
 	for(int i = (int)(wires->size() - 1); i >= 0; i--)
 		ret.push_back((*wires)[i].val);
 	return ret;
 }
+
+/* Defined in 'refresher.cpp' */
+extern std::vector<wire_t> * wireval_to_wires(wireval_t wireval);
 
 #endif /* LOW_LVL_WIREVAL_H_ */
