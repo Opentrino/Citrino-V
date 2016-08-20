@@ -8,6 +8,7 @@
 #ifndef PORT_H_
 #define PORT_H_
 
+#include <stdint.h>
 #include <vector>
 #include <iostream>
 #include "module.h"

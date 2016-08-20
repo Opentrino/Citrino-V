@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdio.h>
+#include <stdint.h>
 #include "citrino.h"
 #include "memory.h"
 #include "low_lvl/module.h"

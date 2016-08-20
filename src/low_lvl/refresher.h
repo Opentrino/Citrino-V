@@ -6,6 +6,7 @@
  */
 
 #include <vector>
+#include <stdint.h>
 #include "port.h"
 #include "../libs/tinythread/tinythread.h"
 

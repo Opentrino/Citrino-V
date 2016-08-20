@@ -38,7 +38,7 @@ void refresh_always() { /* Arg will be ignored */
 		}
 		for(Module * mod : Refresher::modules) { /* Update all components */
 			for(size_t i = 0; i < mod->ports.size(); i++) /* Update all Ports of every component */
-				mod->ports[i]->update(mod->mod_id, i);
+				mod->ports[i]->update(mod->mod_id, (uint32_t)i);
 			mod->update(); /* Update the component itself (based on the updates on the ports (or not)) */
 		}
 	}
