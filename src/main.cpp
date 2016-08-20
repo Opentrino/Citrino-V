@@ -103,6 +103,5 @@ int main() {
 
 	/* Run processes/initial and always blocks: */
 	refresher.run();
-
 	return 0;
 }
