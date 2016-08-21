@@ -8,7 +8,7 @@
 #ifndef CITRINO_H_
 #define CITRINO_H_
 
-#include "low_lvl.h"
+#include "module_api.h"
 
 MODULE_DECL(Citrino)
 public:

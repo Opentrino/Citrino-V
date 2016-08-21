@@ -11,7 +11,8 @@ MODULE_CONSTR(Citrino) {
 }
 
 MODULE_UPDATE(Citrino) {
-	out->drive_all({_0,_1,_X,_Z});
+	wireval_t t = {_0,_Z,_1};
+	DRIVE_ALL(out, t);
 }
 
 MODULE_INITIAL(Citrino) {
