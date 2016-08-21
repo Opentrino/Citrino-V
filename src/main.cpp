@@ -5,8 +5,8 @@
 
 int main() {
 	std::cout<<">> Citrino-V Microprocessor Simulator <<\n";
-	MODULE_OBJDECL(Citrino, cpu);
 	MODULE_OBJDECL(MainMemory, mem);
+	MODULE_OBJDECL(Citrino, cpu);
 
 	/* Run processes/initial and always blocks: */
 	refresher.run();

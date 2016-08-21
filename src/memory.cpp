@@ -7,12 +7,21 @@
 
 #include "memory.h"
 
-MODULE_CONSTR(MainMemory) {
+SIGF_DECL(cback) {
+	wireval_t wireval = GET_WIREVAL(modid, portid);
+	uint8_t val = wireval_u8(wireval);
+	printf("Signal. Module: %d Port: %d Wire: %d Val: %d -> ", modid, portid, wireid, val);
+	print_wireval(wireval);
+	printf("\n");
+}
 
+MODULE_CONSTR(MainMemory) {
+	ONCHANGE(out, cback);
+	PORT_CONNECT_IND(cpu, out, out);
 }
 
 MODULE_UPDATE(MainMemory) {
-	out->drive_all({_0,_1});
+
 }
 
 MODULE_INITIAL(MainMemory) {

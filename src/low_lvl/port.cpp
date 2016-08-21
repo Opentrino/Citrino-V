@@ -42,8 +42,6 @@ Port::Port(Module * ctx, std::string port_name, PortDir dir, PortType type, uint
 	ctx->addport(this);
 }
 
-#include <stdio.h>
-
 void Port::update(uint32_t modid, uint32_t portid) { /* Update Port by checking sensitivity list */
 	std::vector<signal_t> sigs_called;
 
