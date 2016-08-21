@@ -9,11 +9,13 @@
 #include "port.h"
 #include "wireval.h"
 
-Port::Port(Module * ctx, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val) {
+Port::Port(Module * ctx, std::string port_name, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val) {
 	oe = 0;
 	synced = 0; /* Asynchronous by default */
 	this->dir = dir;
 	this->type = type;
+
+	name = port_name;
 
 	/* Initialize internal wires and signals: */
 	wires = new std::vector<wire_t>();
@@ -129,6 +131,10 @@ void Port::set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cba
 void Port::set_sensitivity_bus(sig_raise_t sig_cback) {
 	for(size_t i = 0; i < (*wires).size(); i++)
 		set_sensitivity(i, ALLEDGES, sig_cback);
+}
+
+void Port::onchange(sig_raise_t sig_cback) {
+	set_sensitivity_bus(sig_cback);
 }
 
 /* Drive partial part of the wires and try to match the wire_valdrive value in this window: */

@@ -8,13 +8,11 @@
 #ifndef CITRINO_H_
 #define CITRINO_H_
 
-#include "low_lvl/module.h"
+#include "low_lvl.h"
 
-class Citrino : Module{
+MODULE_DECL(Citrino)
 public:
-	Citrino();
-	void update();
-	void initial();
+	PORT_NEW(out, PORT_INPUT, PORT_WIRE, 8, 0);
 };
 
 #endif /* CITRINO_H_ */

@@ -10,12 +10,21 @@
 #include "wireval.h"
 
 std::vector<Module*> Refresher::modules;
+std::vector<conn_sched_t> Refresher::connection_schedules;
 uint32_t Refresher::module_id = 0;
 bool Refresher::refreshing = 1;
 Refresher refresher;
 
 void Refresher::add_module(Module * comp) {
 	modules.push_back(comp);
+}
+
+void Refresher::connect_schedule(std::string mod_src_name, std::string port_src_name, Port * dst) {
+	conn_sched_t conn_sched;
+	conn_sched.dst = dst;
+	conn_sched.mod_src_name = mod_src_name;
+	conn_sched.port_src_name = port_src_name;
+	connection_schedules.push_back(conn_sched);
 }
 
 std::vector<tthread::thread*> thlist;
@@ -28,8 +37,32 @@ void init_dispatch_call(void * arg) {
 	joinlist.push_back((int)arg);
 }
 
+/* Connect all the ports that are intended to be connected: */
+void connect_all() {
+	if(!Refresher::connection_schedules.size()) return; /* Nothing to connect */
+	int i = 0;
+	std::vector<int> erase_index;
+	for(auto conn : Refresher::connection_schedules) {
+		for(auto module : Refresher::modules)
+			if(module->name == conn.mod_src_name)
+				for(auto port : module->ports)
+					if(port->name == conn.port_src_name) {
+						/* We found the module and the port. We must connect it to the destination port: */
+						port->connect(conn.dst);
+						erase_index.push_back(i);
+					}
+		i++;
+	}
+
+	for(int idx : erase_index)
+		Refresher::connection_schedules.erase(Refresher::connection_schedules.begin() + idx);
+}
+
 void refresh_always() { /* Arg will be ignored */
 	while(Refresher::refreshing) {
+		/* Connect all scheduled wires (that were scheduled 'live'): */
+		connect_all();
+
 		/* Join all threads: */
 		for(int i = 0; i < (int)joinlist.size(); i++) {
 			thlist[joinlist[i]]->join();
@@ -45,6 +78,8 @@ void refresh_always() { /* Arg will be ignored */
 }
 
 void Refresher::run() {
+	/* Connect all scheduled wires before everything starts running: */
+	connect_all();
 	/* Run the 'initial' function for all modules in separate threads: */
 	for(int i = 0; i < (int)modules.size(); i++)
 		thlist.push_back(new tthread::thread(init_dispatch_call, (void*)(i)));

@@ -7,14 +7,14 @@
 
 #include "memory.h"
 
-MainMemory::MainMemory() : Module() {
+MODULE_CONSTR(MainMemory) {
 
 }
 
-void MainMemory::update() {
-
+MODULE_UPDATE(MainMemory) {
+	out->drive_all({_0,_1});
 }
 
-void MainMemory::initial() {
+MODULE_INITIAL(MainMemory) {
 
 }

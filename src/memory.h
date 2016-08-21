@@ -8,13 +8,13 @@
 #ifndef MEMORY_H_
 #define MEMORY_H_
 
-#include "low_lvl/module.h"
+#include "low_lvl.h"
 
-class MainMemory : Module{
+MODULE_DECL(MainMemory)
 public:
-	MainMemory();
-	void update();
-	void initial();
+	PORT_NEW(out, PORT_OUTPUT, PORT_REG,  8,  0);
+	PORT_NEW(in,  PORT_INPUT , PORT_WIRE, 32, 0);
+	PORT_NEW(clk, PORT_INPUT , PORT_WIRE, 1,  0);
 };
 
 #endif /* MEMORY_H_ */

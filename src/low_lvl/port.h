@@ -99,7 +99,9 @@ private:
 	bool wires_dirty = 0;
 
 public:
-	Port(Module * ctx, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
+	std::string name; /* Port name */
+
+	Port(Module * ctx, std::string port_name, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
 
 	void connect(Port* dst_port); /* Links two wires together */
 
@@ -133,6 +135,7 @@ public:
 	PortDriveError drive_all(std::vector<WireVal> wire_valdrive);
 	void set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cback);
 	void set_sensitivity_bus(sig_raise_t sig_cback);
+	void onchange(sig_raise_t sig_cback);
 	void update(uint32_t modid, uint32_t portid);
 	void clean_wires();
 	uint32_t get_wire_width();
