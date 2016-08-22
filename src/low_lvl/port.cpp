@@ -143,11 +143,12 @@ void Port::update(uint32_t modid, uint32_t portid) { /* Update Port by checking 
 	}
 }
 
-void Port::set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cback) {
-	if(nth_wire >= (*signals).size()) return;
+PortSensError Port::set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cback) {
+	if(nth_wire >= (*signals).size()) return PORT_SENS_OUTOFBOUNDS;
 
 	(*signals)[nth_wire].edge_trigger = edge;
 	(*signals)[nth_wire].raise = sig_cback;
+	return PORT_SENS_OK;
 }
 
 void Port::set_sensitivity_bus(sig_raise_t sig_cback) {
@@ -190,7 +191,7 @@ PortDriveError Port::drive_all(std::vector<WireVal> wire_valdrive) {
 }
 
 /* Connect destination port with this current source port: */
-void Port::connect(Port * dst_port) {
+PortConnectError Port::connect(Port * dst_port) {
 	if(dst_port->type == PORT_WIRE) {
 		dst_port->clean_wires(); /* This is solely to prevent memory leak */
 		dst_port->wires = this->wires; /* Connect wires */
@@ -198,11 +199,13 @@ void Port::connect(Port * dst_port) {
 			(*wires)[i].modules_connected++;
 			(*wires)[i].modules_connected_orig = (*wires)[i].modules_connected;
 		}
+		return PORT_CONNECT_OK;
 	}
+	return PORT_CONNECT_DST_NOTAWIRE;
 }
 
-void Port::assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_len, void * cback_args) {
-	if(dir == PORT_INPUT) return; /* This port is an input, we can't assign anything to it */
+PortAssignError Port::assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_len, void * cback_args) {
+	if(dir == PORT_INPUT) return PORT_ASSIGN_ISINPUT; /* This port is an input, we can't assign anything to it */
 
 	assign_t new_assign;
 	new_assign.assign_func = assign_cback ? assign_cback : 0;
@@ -214,32 +217,33 @@ void Port::assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_le
 	new_assign.wire_off = wire_off < wires->size() ? wire_off : 0;
 	new_assign.wire_len = wire_len < wires->size() ? wire_len + 1 : new_assign.wire_off + 1 >= wires->size() ? 0 : 1;
 	assigns->push_back(new_assign);
+	return PORT_ASSIGN_OK;
 }
 
-void Port::assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_len) {
-	assign(assign_cback, wire_off, wire_len, 0);
+PortAssignError Port::assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_len) {
+	return assign(assign_cback, wire_off, wire_len, 0);
 }
 
-void Port::assign(assign_ret_t assign_cback, uint32_t nth_wire, void * cback_args) {
-	assign(assign_cback, nth_wire, 1, cback_args);
+PortAssignError Port::assign(assign_ret_t assign_cback, uint32_t nth_wire, void * cback_args) {
+	return assign(assign_cback, nth_wire, 1, cback_args);
 }
 
-void Port::assign(assign_ret_t assign_cback, uint32_t nth_wire) {
-	assign(assign_cback, nth_wire, 1, 0);
+PortAssignError Port::assign(assign_ret_t assign_cback, uint32_t nth_wire) {
+	return assign(assign_cback, nth_wire, 1, 0);
 }
 
-void Port::assign(assign_ret_t assign_cback, void * cback_args) {
-	assign(assign_cback, 0, wires->size() - 1, cback_args);
+PortAssignError Port::assign(assign_ret_t assign_cback, void * cback_args) {
+	return assign(assign_cback, 0, wires->size() - 1, cback_args);
 }
 
-void Port::assign(assign_ret_t assign_cback) {
-	assign(assign_cback, 0, wires->size() - 1, 0);
+PortAssignError Port::assign(assign_ret_t assign_cback) {
+	return assign(assign_cback, 0, wires->size() - 1, 0);
 }
 
-void Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t wire_off,
+PortAssignError Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t wire_off,
 		uint32_t wire_len, void * cback_args
 ) {
-	if(dir == PORT_INPUT) return; /* This port is an input, we can't assign anything to it */
+	if(dir == PORT_INPUT) return PORT_ASSIGN_ISINPUT; /* This port is an input, we can't assign anything to it */
 
 	std::reverse(left_side.begin(), left_side.end());
 	std::reverse(right_side.begin(),right_side.end());
@@ -256,32 +260,33 @@ void Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_s
 	new_assign.wire_off = wire_off < wires->size() ? wire_off : 0;
 	new_assign.wire_len = wire_len < wires->size() ? wire_len + 1 : new_assign.wire_off + 1 >= wires->size() ? 0 : 1;
 	assigns->push_back(new_assign);
+	return PORT_ASSIGN_OK;
 }
 
-void Port::assign_cond(uint8_t condition, wireval_t left_side,
+PortAssignError Port::assign_cond(uint8_t condition, wireval_t left_side,
 		wireval_t right_side, uint32_t wire_off, uint32_t wire_len
 ) {
-	assign_cond(condition, left_side, right_side, wire_off, wire_len, 0);
+	return assign_cond(condition, left_side, right_side, wire_off, wire_len, 0);
 }
 
-void Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t nth_wire, void * cback_args) {
-	assign_cond(condition, left_side, right_side, nth_wire, 1, cback_args);
+PortAssignError Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t nth_wire, void * cback_args) {
+	return assign_cond(condition, left_side, right_side, nth_wire, 1, cback_args);
 }
 
-void Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t nth_wire) {
-	assign_cond(condition, left_side, right_side, nth_wire, 1, 0);
+PortAssignError Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t nth_wire) {
+	return assign_cond(condition, left_side, right_side, nth_wire, 1, 0);
 }
 
-void Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, void * cback_args) {
-	assign_cond(condition, left_side, right_side, 0, wires->size() - 1, cback_args);
+PortAssignError Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, void * cback_args) {
+	return assign_cond(condition, left_side, right_side, 0, wires->size() - 1, cback_args);
 }
 
-void Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side) {
-	assign_cond(condition, left_side, right_side, 0, wires->size() - 1, 0);
+PortAssignError Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side) {
+	return assign_cond(condition, left_side, right_side, 0, wires->size() - 1, 0);
 }
 
-void Port::assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_len, void * cback_args) {
-	if(dir == PORT_INPUT) return; /* This port is an input, we can't assign anything to it */
+PortAssignError Port::assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_len, void * cback_args) {
+	if(dir == PORT_INPUT) return PORT_ASSIGN_ISINPUT; /* This port is an input, we can't assign anything to it */
 
 	std::reverse(const_val.begin(),const_val.end());
 
@@ -296,26 +301,27 @@ void Port::assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_le
 	new_assign.wire_off = wire_off < wires->size() ? wire_off : 0;
 	new_assign.wire_len = wire_len < wires->size() ? wire_len + 1 : new_assign.wire_off + 1 >= wires->size() ? 0 : 1;
 	assigns->push_back(new_assign);
+	return PORT_ASSIGN_OK;
 }
 
-void Port::assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_len) {
-	assign_const(const_val, wire_off, wire_len, 0);
+PortAssignError Port::assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_len) {
+	return assign_const(const_val, wire_off, wire_len, 0);
 }
 
-void Port::assign_const(wireval_t const_val, uint32_t nth_wire) {
-	assign_const(const_val, nth_wire, 1, 0);
+PortAssignError Port::assign_const(wireval_t const_val, uint32_t nth_wire) {
+	return assign_const(const_val, nth_wire, 1, 0);
 }
 
-void Port::assign_const(wireval_t const_val, uint32_t nth_wire, void * cback_args) {
-	assign_const(const_val, nth_wire, 1, cback_args);
+PortAssignError Port::assign_const(wireval_t const_val, uint32_t nth_wire, void * cback_args) {
+	return assign_const(const_val, nth_wire, 1, cback_args);
 }
 
-void Port::assign_const(wireval_t const_val) {
-	assign_const(const_val, 0, wires->size() - 1, 0);
+PortAssignError Port::assign_const(wireval_t const_val) {
+	return assign_const(const_val, 0, wires->size() - 1, 0);
 }
 
-void Port::assign_const(wireval_t const_val, void * cback_args) {
-	assign_const(const_val, 0, wires->size() - 1, cback_args);
+PortAssignError Port::assign_const(wireval_t const_val, void * cback_args) {
+	return assign_const(const_val, 0, wires->size() - 1, cback_args);
 }
 
 void Port::update_assign_condition(uint32_t nth_condition, uint8_t new_cond) {

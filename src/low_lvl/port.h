@@ -48,6 +48,21 @@ enum PortDriveError {
 	PORT_DRIVE_ERROR_OUTOFBOUNDS
 };
 
+enum PortAssignError {
+	PORT_ASSIGN_OK,
+	PORT_ASSIGN_ISINPUT
+};
+
+enum PortConnectError {
+	PORT_CONNECT_OK,
+	PORT_CONNECT_DST_NOTAWIRE
+};
+
+enum PortSensError {
+	PORT_SENS_OK,
+	PORT_SENS_OUTOFBOUNDS
+};
+
 enum AssignType {
 	ASSIGN_CBACK, /* Assignment is resolved by a callback */
 	ASSIGN_COND,  /* Assignment is resolved by a condition */
@@ -114,37 +129,37 @@ public:
 
 	Port(Module * ctx, uint32_t portid, std::string port_name, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
 
-	void connect(Port* dst_port); /* Links two wires together */
+	PortConnectError connect(Port* dst_port); /* Links two wires together */
 
 	 /* Calls a callback, which then returns the value into a wire, in every cycle: */
-	void assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_len, void * cback_args);
-	void assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_len);
-	void assign(assign_ret_t assign_cback, uint32_t nth_wire, void * cback_args);
-	void assign(assign_ret_t assign_cback, uint32_t nth_wire);
-	void assign(assign_ret_t assign_cback, void * cback_args);
-	void assign(assign_ret_t assign_cback);
+	PortAssignError assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_len, void * cback_args);
+	PortAssignError assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_len);
+	PortAssignError assign(assign_ret_t assign_cback, uint32_t nth_wire, void * cback_args);
+	PortAssignError assign(assign_ret_t assign_cback, uint32_t nth_wire);
+	PortAssignError assign(assign_ret_t assign_cback, void * cback_args);
+	PortAssignError assign(assign_ret_t assign_cback);
 
 	/* Same as 'assign', but resolves a condition instead of a callback's return value: */
-	void assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t wire_off, uint32_t wire_len, void * cback_args);
-	void assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t wire_off, uint32_t wire_len);
-	void assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t nth_wire, void * cback_args);
-	void assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t nth_wire);
-	void assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, void * cback_args);
-	void assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side);
+	PortAssignError assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t wire_off, uint32_t wire_len, void * cback_args);
+	PortAssignError assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t wire_off, uint32_t wire_len);
+	PortAssignError assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t nth_wire, void * cback_args);
+	PortAssignError assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t nth_wire);
+	PortAssignError assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, void * cback_args);
+	PortAssignError assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side);
 
 	/* Assign a constant wire value to a single wire, or a set of wires: */
-	void assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_len, void * cback_args);
-	void assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_len);
-	void assign_const(wireval_t const_val, uint32_t nth_wire, void * cback_args);
-	void assign_const(wireval_t const_val, uint32_t nth_wire);
-	void assign_const(wireval_t const_val, void * cback_args);
-	void assign_const(wireval_t const_val);
+	PortAssignError assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_len, void * cback_args);
+	PortAssignError assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_len);
+	PortAssignError assign_const(wireval_t const_val, uint32_t nth_wire, void * cback_args);
+	PortAssignError assign_const(wireval_t const_val, uint32_t nth_wire);
+	PortAssignError assign_const(wireval_t const_val, void * cback_args);
+	PortAssignError assign_const(wireval_t const_val);
 
 	void update_assign_condition(uint32_t nth_condition, uint8_t new_cond);
 
 	PortDriveError drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive);
 	PortDriveError drive_all(std::vector<WireVal> wire_valdrive);
-	void set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cback);
+	PortSensError set_sensitivity(uint32_t nth_wire, WireEdge edge, sig_raise_t sig_cback);
 	void set_sensitivity_bus(sig_raise_t sig_cback);
 	void onchange(sig_raise_t sig_cback);
 	void update(uint32_t modid, uint32_t portid);
