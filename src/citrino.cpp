@@ -7,7 +7,7 @@
 #include "citrino.h"
 
 MODULE_CONSTR(Citrino) {
-	PORT_CONNECT(mem, clk, clk, CONN_DST_TO_SRC);
+
 }
 
 char clk_val = 0;

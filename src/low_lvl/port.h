@@ -89,8 +89,6 @@ typedef struct assign {
 
 class Port {
 private:
-	PortDir dir;                     /* Input, Output, Inout */
-	PortType type;                   /* Reg or Wire */
 	bool synced;                     /* Synchronous or asynchronous */
 	bool oe;                         /* Output Enable */
 	std::vector<wire_t>   * wires;   /* Wires */
@@ -100,6 +98,8 @@ private:
 
 public:
 	std::string name; /* Port name */
+	PortDir dir;      /* Input, Output, Inout */
+	PortType type;    /* Reg or Wire */
 
 	Port(Module * ctx, std::string port_name, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
 

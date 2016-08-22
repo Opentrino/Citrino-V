@@ -16,6 +16,7 @@ SIGF_DECL(cback) {
 }
 
 MODULE_CONSTR(MainMemory) {
+	PORT_CONNECT(cpu, clk, clk);
 	clk->set_sensitivity(0, LEVELEDGE, cback);
 }
 
