@@ -53,7 +53,11 @@ enum AssignType {
 };
 
 /* Signal callback type: */
-typedef void (*sig_raise_t)(uint32_t modid, uint32_t portid, uint32_t wireid, WireVal wire_logicval, WireEdge edge); /* Logic val can be: X, Z, 0 and 1 */
+typedef void (*sig_raise_t)(
+	uint32_t this_modid,  uint32_t remote_modid,
+	uint32_t this_portid, uint32_t remote_portid,
+	uint32_t wireid, WireVal wire_logicval, WireEdge edge
+); /* Logic val can be: X, Z, 0 and 1 */
 
 /* Signal struct type: */
 typedef struct signal {
@@ -62,11 +66,14 @@ typedef struct signal {
 } signal_t;
 
 typedef struct wire {
-	WireVal val;                     /* X, Z, 0, 1 */
+	WireVal  val;                    /* X, Z, 0, 1 */
 	WireEdge edge;                   /* Wire edge sensitivity. Can be posedge or negedge */
 	WireEdge old_edge;               /* Store old edge in order to detect a change in logic */
 	uint32_t modules_connected;      /* How many modules share this wire */
 	uint32_t modules_connected_orig; /* Original value of the previous variable */
+	Module * last_mod_drive;         /* Last module that has driven this wire */
+	Port   * last_port_drive;        /* Last module's port that has driven this wire */
+	char     refcount;               /* How many modules tried to drive this wire in a single clock cycle */
 } wire_t;
 
 typedef std::vector<WireVal> wireval_t;
@@ -95,13 +102,15 @@ private:
 	std::vector<signal_t> * signals; /* Signal callbacks. Each wire can have a callback, but each port may have different signals */
 	std::vector<assign_t> * assigns; /* Wire assignments */
 	bool wires_dirty = 0;
+	uint32_t portid;
 
 public:
-	std::string name; /* Port name */
-	PortDir dir;      /* Input, Output, Inout */
-	PortType type;    /* Reg or Wire */
+	Module * modparent; /* What module does this port belong to */
+	std::string name;   /* Port name */
+	PortDir dir;        /* Input, Output, Inout */
+	PortType type;      /* Reg or Wire */
 
-	Port(Module * ctx, std::string port_name, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
+	Port(Module * ctx, uint32_t portid, std::string port_name, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val);
 
 	void connect(Port* dst_port); /* Links two wires together */
 

@@ -8,9 +8,10 @@
 #include "memory.h"
 
 SIGF_DECL(cback) {
-	wireval_t wireval = GET_WIREVAL(modid, portid);
+	Module * mod = GET_MODULE(remote_modid);
+	wireval_t wireval = GET_WIREVAL(this_modid, this_portid);
 	uint8_t val = wireval_u8(wireval);
-	printf("Signal. Module: %d Port: %d Wire: %d Val: %d -> ", modid, portid, wireid, val);
+	printf("Signal. Module: %s %d Foreign: %d This: %d Wire: %d Val: %d -> ", mod->name.c_str(), remote_modid, this_portid, remote_portid, wireid, val);
 	print_wireval(wireval);
 	printf("\n");
 }

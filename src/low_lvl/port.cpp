@@ -9,7 +9,8 @@
 #include "port.h"
 #include "wireval.h"
 
-Port::Port(Module * ctx, std::string port_name, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val) {
+Port::Port(Module * ctx, uint32_t portid, std::string port_name, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val) {
+	this->portid = portid;
 	oe = 0;
 	synced = 0; /* Asynchronous by default */
 	this->dir = dir;
@@ -31,6 +32,9 @@ Port::Port(Module * ctx, std::string port_name, PortDir dir, PortType type, uint
 		wires_dirty = 1;
 		wire.modules_connected = 0;
 		wire.modules_connected_orig = 0;
+		wire.refcount = 0;
+		wire.last_mod_drive  = 0;
+		wire.last_port_drive = 0;
 		wires->push_back(wire);
 
 		/* Setup a single null signal for this particular wire on this particular port on this particular module: */
@@ -39,6 +43,7 @@ Port::Port(Module * ctx, std::string port_name, PortDir dir, PortType type, uint
 		nullsignal.edge_trigger = NULLEDGE; /* No sensitivity present */
 		signals->push_back(nullsignal);
 	}
+	modparent = ctx;
 	ctx->addport(this);
 }
 
@@ -56,8 +61,11 @@ void Port::update(uint32_t modid, uint32_t portid) { /* Update Port by checking 
 					std::vector<wire_t> * cback_ret = wireval_to_wires(wireval);
 					for(int j = (int)(assign.wire_off), k = 0; j < (int)(assign.wire_off + assign.wire_len) && j < (int)(wires->size()) && k < (int)(cback_ret->size()); j++, k++) {
 						WireVal logic = wireval[j];
+						(*wires)[i].last_mod_drive = modparent;
+						(*wires)[i].last_port_drive = this;
 						(*wires)[j].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _Z ? NOEDGE : NULLEDGE;
 						(*wires)[j].val = (*cback_ret)[k].val;
+						(*wires)[i].refcount++;
 					}
 				}
 			}
@@ -68,8 +76,11 @@ void Port::update(uint32_t modid, uint32_t portid) { /* Update Port by checking 
 				std::vector<wire_t> * assign_val = assign.condition ? assign.left_side : assign.right_side;
 				for(int j = (int)(assign.wire_off), k = 0; j < (int)(assign.wire_off + assign.wire_len) && j < (int)(wires->size()) && k < (int)(assign_val->size()); j++, k++) {
 					WireVal logic = wireval[j];
+					(*wires)[i].last_mod_drive = modparent;
+					(*wires)[i].last_port_drive = this;
 					(*wires)[j].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _Z ? NOEDGE : NULLEDGE;
 					(*wires)[j].val = (*assign_val)[k].val;
+					(*wires)[i].refcount++;
 				}
 			}
 			break;
@@ -77,8 +88,11 @@ void Port::update(uint32_t modid, uint32_t portid) { /* Update Port by checking 
 				/* Assign wires inconditionally: */
 				for(int j = (int)(assign.wire_off), k = 0; j < (int)(assign.wire_off + assign.wire_len) && j < (int)(wires->size()) && k < (int)(assign.left_side->size()); j++, k++) {
 					WireVal logic = assign.left_side_val[k];
+					(*wires)[i].last_mod_drive = modparent;
+					(*wires)[i].last_port_drive = this;
 					(*wires)[j].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _Z ? NOEDGE : NULLEDGE;
 					(*wires)[j].val = (*assign.left_side)[k].val;
+					(*wires)[i].refcount++;
 				}
 			}
 			break;
@@ -110,12 +124,22 @@ void Port::update(uint32_t modid, uint32_t portid) { /* Update Port by checking 
 						break;
 					}
 				}
-				if(!sig_already_called) {
+				if(!sig_already_called && (*wires)[i].refcount == 1 && (*wires)[i].last_mod_drive && (*wires)[i].last_port_drive) {
 					sigs_called.push_back((*signals)[i]);
-					(*signals)[i].raise(modid, portid, i, (*wires)[i].val, (*wires)[i].edge); /* Call callback if a delta signal is detected */
+					/* Call callback if a delta signal is detected: */
+					(*signals)[i].raise(
+							modid,
+							(*wires)[i].last_mod_drive->mod_id,
+							portid,
+							(*wires)[i].last_port_drive->portid,
+							i,
+							(*wires)[i].val,
+							(*wires)[i].edge
+					);
 				}
 			}
 		}
+		(*wires)[i].refcount = 0;
 	}
 }
 
@@ -147,9 +171,14 @@ PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vect
 	}
 
 	for(int i = (int)wire_offset, j = (int)wire_valdrive.size() - 1; (i < (int)(*wires).size()) && (i < (int)(wire_offset + wire_length)) && (j >= 0); i++) {
+		if((*wires)[i].refcount) continue; /* This wire has been driven by more than one module at a time! */
+
 		WireVal logic = wire_valdrive[j--];
+		(*wires)[i].last_mod_drive = modparent;
+		(*wires)[i].last_port_drive = this;
 		(*wires)[i].edge = logic == _1 ? POSEDGE : logic == _0 ? NEGEDGE : logic == _Z ? NOEDGE : NULLEDGE;
 		(*wires)[i].val = logic;
+		(*wires)[i].refcount++;
 	}
 	return PORT_DRIVE_OK;
 }
