@@ -161,7 +161,8 @@ void Port::onchange(sig_raise_t sig_cback) {
 
 /* Drive partial part of the wires and try to match the wire_valdrive value in this window: */
 PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive) {
-	if(type != PORT_REG) return PORT_DRIVE_ERROR_NOTAREG;
+	if(type != PORT_REG)  return PORT_DRIVE_ERROR_NOTAREG;
+	if(dir == PORT_INPUT) return PORT_DRIVE_ERROR_ISINPUT;
 	if(wire_offset >= (*wires).size()) return PORT_DRIVE_ERROR_OUTOFBOUNDS;
 
 	/* Nullify the undriven wires. Then overwrite undriven wires with driven ones: */
@@ -201,6 +202,8 @@ void Port::connect(Port * dst_port) {
 }
 
 void Port::assign(assign_ret_t assign_cback, uint32_t wire_off, uint32_t wire_len, void * cback_args) {
+	if(dir == PORT_INPUT) return; /* This port is an input, we can't assign anything to it */
+
 	assign_t new_assign;
 	new_assign.assign_func = assign_cback ? assign_cback : 0;
 	new_assign.assign_type = ASSIGN_CBACK;
@@ -236,6 +239,8 @@ void Port::assign(assign_ret_t assign_cback) {
 void Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_side, uint32_t wire_off,
 		uint32_t wire_len, void * cback_args
 ) {
+	if(dir == PORT_INPUT) return; /* This port is an input, we can't assign anything to it */
+
 	std::reverse(left_side.begin(), left_side.end());
 	std::reverse(right_side.begin(),right_side.end());
 
@@ -276,6 +281,8 @@ void Port::assign_cond(uint8_t condition, wireval_t left_side, wireval_t right_s
 }
 
 void Port::assign_const(wireval_t const_val, uint32_t wire_off, uint32_t wire_len, void * cback_args) {
+	if(dir == PORT_INPUT) return; /* This port is an input, we can't assign anything to it */
+
 	std::reverse(const_val.begin(),const_val.end());
 
 	assign_t new_assign;
@@ -312,6 +319,8 @@ void Port::assign_const(wireval_t const_val, void * cback_args) {
 }
 
 void Port::update_assign_condition(uint32_t nth_condition, uint8_t new_cond) {
+	if(dir == PORT_INPUT) return; /* This port is an input, we can't assign anything to it */
+
 	if(nth_condition < assigns->size())
 		(*assigns)[nth_condition].condition = new_cond;
 }

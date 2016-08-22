@@ -14,14 +14,15 @@
 #include "module.h"
 
 enum PortDir {
-	PORT_INPUT,
-	PORT_OUTPUT,
-	PORT_INOUT
+	PORT_INPUT,  /* Input */
+	PORT_OUTPUT, /* Output */
+	PORT_INOUT,  /* Input and Output */
+	PORT_NODIR   /* Internal port with no direction */
 };
 
 enum PortType {
-	PORT_REG,
-	PORT_WIRE
+	PORT_REG, /* Register (buffered/latched/synchronous) type */
+	PORT_WIRE /* Wire (asynchronous) type*/
 };
 
 enum WireEdge {
@@ -43,6 +44,7 @@ enum WireVal {
 enum PortDriveError {
 	PORT_DRIVE_OK,
 	PORT_DRIVE_ERROR_NOTAREG,
+	PORT_DRIVE_ERROR_ISINPUT,
 	PORT_DRIVE_ERROR_OUTOFBOUNDS
 };
 
