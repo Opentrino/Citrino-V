@@ -91,8 +91,7 @@ void refresh_always() {
 						mod->update();
 			}
 
-			if(Refresher::driven_wires_on_update)
-				sub_refresh_count++;
+			sub_refresh_count++;
 		} while(Refresher::driven_wires_on_update);
 
 		Refresher::refresh_cycle++;

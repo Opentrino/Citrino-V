@@ -115,9 +115,9 @@ class Port {
 private:
 	bool synced;                     /* Synchronous or asynchronous */
 	bool oe;                         /* Output Enable */
+	std::vector<wire_t>   * wires;   /* Wires */
 	std::vector<signal_t> * signals; /* Signal callbacks. Each wire can have a callback, but each port may have different signals */
 	std::vector<assign_t> * assigns; /* Wire assignments */
-	std::vector<wire_t>   * wires;   /* Wires */
 	bool wires_dirty = 0;
 	uint32_t portid;
 
