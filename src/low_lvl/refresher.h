@@ -27,7 +27,9 @@ public:
 	static std::vector<Module*> modules;
 	static std::vector<conn_sched_t> connection_schedules;
 	static bool refreshing;
+	static bool driven_wires_on_update;
 	static uint32_t module_id;
+	static uint64_t refresh_cycle;
 
 	static void add_module(Module * comp);
 	void run(); /* Runs the initials and updates in different threads */

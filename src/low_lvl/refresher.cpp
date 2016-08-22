@@ -13,6 +13,8 @@ std::vector<Module*> Refresher::modules;
 std::vector<conn_sched_t> Refresher::connection_schedules;
 uint32_t Refresher::module_id = 0;
 bool Refresher::refreshing = 1;
+uint64_t Refresher::refresh_cycle = 0;
+bool Refresher::driven_wires_on_update = 0;
 Refresher refresher;
 
 void Refresher::add_module(Module * comp) {
@@ -73,11 +75,27 @@ void refresh_always() {
 			delete thlist[joinlist[i]];
 			joinlist.erase(joinlist.begin() + i);
 		}
-		for(Module * mod : Refresher::modules) { /* Update all components */
-			for(size_t i = 0; i < mod->ports.size(); i++) /* Update all Ports of every component */
-				mod->ports[i]->update(mod->mod_id, (uint32_t)i);
-			mod->update(); /* Update the component itself (based on the updates on the ports (or not)) */
-		}
+
+		/* Update all modules: */
+		char sub_refresh_count = 0;
+		do {
+			Refresher::driven_wires_on_update = 0;
+
+			for(Module * mod : Refresher::modules) {
+					/* Update all Ports of every module: */
+					for(size_t i = 0; i < mod->ports.size(); i++)
+						mod->ports[i]->update(mod->mod_id, (uint32_t)i);
+
+					/* Update the module itself (based on the updates on the ports (or not)): */
+					if(!sub_refresh_count) /* Only update once though */
+						mod->update();
+			}
+
+			if(Refresher::driven_wires_on_update)
+				sub_refresh_count++;
+		} while(Refresher::driven_wires_on_update);
+
+		Refresher::refresh_cycle++;
 	}
 }
 

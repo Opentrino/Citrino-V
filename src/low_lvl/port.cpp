@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include "port.h"
+#include "refresher.h"
 #include "wireval.h"
 
 Port::Port(Module * ctx, uint32_t portid, std::string port_name, PortDir dir, PortType type, uint32_t port_width, uint32_t default_val) {
@@ -124,7 +125,8 @@ void Port::update(uint32_t modid, uint32_t portid) { /* Update Port by checking 
 						break;
 					}
 				}
-				if(!sig_already_called && (*wires)[i].refcount == 1 && (*wires)[i].last_mod_drive && (*wires)[i].last_port_drive) {
+
+				if((*wires)[i].refcount == 1 && !sig_already_called && (*wires)[i].last_mod_drive && (*wires)[i].last_port_drive) {
 					sigs_called.push_back((*signals)[i]);
 					/* Call callback if a delta signal is detected: */
 					(*signals)[i].raise(
@@ -162,8 +164,8 @@ void Port::onchange(sig_raise_t sig_cback) {
 
 /* Drive partial part of the wires and try to match the wire_valdrive value in this window: */
 PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vector<WireVal> wire_valdrive) {
-	if(type != PORT_REG)  return PORT_DRIVE_ERROR_NOTAREG;
-	if(dir == PORT_INPUT) return PORT_DRIVE_ERROR_ISINPUT;
+	if(type != PORT_REG)   return PORT_DRIVE_ERROR_NOTAREG;
+	if(dir  == PORT_INPUT) return PORT_DRIVE_ERROR_ISINPUT;
 	if(wire_offset >= (*wires).size()) return PORT_DRIVE_ERROR_OUTOFBOUNDS;
 
 	/* Nullify the undriven wires. Then overwrite undriven wires with driven ones: */
@@ -175,6 +177,7 @@ PortDriveError Port::drive(uint32_t wire_offset, uint32_t wire_length, std::vect
 	for(int i = (int)wire_offset, j = (int)wire_valdrive.size() - 1; (i < (int)(*wires).size()) && (i < (int)(wire_offset + wire_length)) && (j >= 0); i++) {
 		if((*wires)[i].refcount) continue; /* This wire has been driven by more than one module at a time! */
 
+		Refresher::driven_wires_on_update = 1;
 		WireVal logic = wire_valdrive[j--];
 		(*wires)[i].last_mod_drive = modparent;
 		(*wires)[i].last_port_drive = this;
