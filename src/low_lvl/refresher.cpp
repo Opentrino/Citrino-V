@@ -19,9 +19,10 @@ void Refresher::add_module(Module * comp) {
 	modules.push_back(comp);
 }
 
-void Refresher::connect_schedule(std::string mod_src_name, std::string port_src_name, Port * dst) {
+void Refresher::connect_schedule(std::string mod_src_name, std::string port_src_name, Port * dst, CONN_DIR connection_direction) {
 	conn_sched_t conn_sched;
 	conn_sched.dst = dst;
+	conn_sched.dir = connection_direction;
 	conn_sched.mod_src_name = mod_src_name;
 	conn_sched.port_src_name = port_src_name;
 	connection_schedules.push_back(conn_sched);
@@ -48,7 +49,10 @@ void connect_all() {
 				for(auto port : module->ports)
 					if(port->name == conn.port_src_name) {
 						/* We found the module and the port. We must connect it to the destination port: */
-						port->connect(conn.dst);
+						if(conn.dir == CONN_SRC_TO_DST)
+							port->connect(conn.dst);
+						else if(conn.dir == CONN_DST_TO_SRC)
+							conn.dst->connect(port);
 						erase_index.push_back(i);
 					}
 		i++;
@@ -58,7 +62,7 @@ void connect_all() {
 		Refresher::connection_schedules.erase(Refresher::connection_schedules.begin() + idx);
 }
 
-void refresh_always() { /* Arg will be ignored */
+void refresh_always() {
 	while(Refresher::refreshing) {
 		/* Connect all scheduled wires (that were scheduled 'live'): */
 		connect_all();

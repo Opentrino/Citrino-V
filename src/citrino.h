@@ -12,7 +12,8 @@
 
 MODULE_DECL(Citrino)
 public:
-	PORT_NEW(out, PORT_INPUT, PORT_REG, 8, 0);
+	PORT_NEW(out, PORT_INPUT,   PORT_REG, 8,  0);
+	PORT_NEW(clk, PORT_OUTPUT , PORT_REG, 1,  0);
 };
 
 #endif /* CITRINO_H_ */

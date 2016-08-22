@@ -7,12 +7,14 @@
 #include "citrino.h"
 
 MODULE_CONSTR(Citrino) {
-
+	PORT_CONNECT(mem, clk, clk, CONN_DST_TO_SRC);
 }
 
+char clk_val = 0;
+
 MODULE_UPDATE(Citrino) {
-	wireval_t t = {_0,_Z,_1};
-	DRIVE_ALL(out, t);
+	DRIVEI_ALL(clk, clk_val);
+	clk_val = ~clk_val;
 }
 
 MODULE_INITIAL(Citrino) {
